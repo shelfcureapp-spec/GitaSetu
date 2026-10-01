@@ -303,7 +303,7 @@ Every appropriate AI explanation has a **▶ Listen** control. Player shows titl
 
 ## 29. Navigation
 
-Bottom nav: **Home | Explore | Practice | Reflect | Profile**
+Bottom nav: **Home | Explore | Talk | Practice | Profile** (updated to match the UI reference). Evening Reflection lives under Practice and Home; "Your Journey" (patterns, insights, growth) is the Profile tab.
 
 ## 30. Home
 

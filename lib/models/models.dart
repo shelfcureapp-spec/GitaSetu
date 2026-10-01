@@ -18,15 +18,18 @@ enum Confidence { high, medium, low }
 class GitaVerse {
   final String ref; // e.g. "2.62"
   final String summary; // English summary of what the verse says
-  final String? sanskrit; // to be ingested from the curated source
+  final String? sanskrit; // Devanagari; to be verified against the curated source
+  final String? transliteration;
   final SourceType sourceType;
   const GitaVerse({
     required this.ref,
     required this.summary,
     this.sanskrit,
+    this.transliteration,
     this.sourceType = SourceType.direct,
   });
   String get title => 'Bhagavad Gita $ref';
+  int get chapter => int.parse(ref.split('.').first);
 }
 
 /// Three-level concept mapping (PRD §14).
@@ -39,9 +42,11 @@ class Concept {
   final List<String> keywords; // retrieval hints
   final List<String> investigationQuestions;
   final String interpretation;
+  final String reflectionQuestion;
   final String practiceTitle;
   final String practiceTrigger;
   final String practiceAction;
+  final String practiceType;
   final String quality;
   const Concept({
     required this.sanskrit,
@@ -52,9 +57,11 @@ class Concept {
     required this.keywords,
     required this.investigationQuestions,
     required this.interpretation,
+    required this.reflectionQuestion,
     required this.practiceTitle,
     required this.practiceTrigger,
     required this.practiceAction,
+    required this.practiceType,
     required this.quality,
   });
 }
@@ -64,19 +71,31 @@ class PracticeOffer {
   final String trigger;
   final String action;
   final String quality;
+  final String frequency;
+  final String type;
   const PracticeOffer({
     required this.title,
     required this.trigger,
     required this.action,
     required this.quality,
+    this.frequency = 'Every time',
+    this.type = 'Pause practice',
   });
-  Map<String, dynamic> toJson() =>
-      {'title': title, 'trigger': trigger, 'action': action, 'quality': quality};
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'trigger': trigger,
+        'action': action,
+        'quality': quality,
+        'frequency': frequency,
+        'type': type,
+      };
   factory PracticeOffer.fromJson(Map<String, dynamic> j) => PracticeOffer(
         title: j['title'] ?? 'Small practice',
         trigger: j['trigger'] ?? '',
         action: j['action'] ?? '',
         quality: j['quality'] ?? '',
+        frequency: j['frequency'] ?? 'Every time',
+        type: j['type'] ?? 'Practice',
       );
 }
 
@@ -88,6 +107,7 @@ class ChatMessage {
   final String text;
   final List<String> verseRefs;
   final String? gitaConnection;
+  final String? reflectionQuestion;
   final PracticeOffer? offer;
   final OfferState offerState;
   final bool safety;
@@ -97,6 +117,7 @@ class ChatMessage {
     required this.text,
     this.verseRefs = const [],
     this.gitaConnection,
+    this.reflectionQuestion,
     this.offer,
     this.offerState = OfferState.pending,
     this.safety = false,
@@ -108,6 +129,7 @@ class ChatMessage {
         text: text,
         verseRefs: verseRefs,
         gitaConnection: gitaConnection,
+        reflectionQuestion: reflectionQuestion,
         offer: offer,
         offerState: s,
         safety: safety,
@@ -119,6 +141,7 @@ class ChatMessage {
         'text': text,
         'verseRefs': verseRefs,
         'gitaConnection': gitaConnection,
+        'reflectionQuestion': reflectionQuestion,
         'offer': offer?.toJson(),
         'offerState': offerState.name,
         'safety': safety,
@@ -129,6 +152,7 @@ class ChatMessage {
         text: j['text'],
         verseRefs: List<String>.from(j['verseRefs'] ?? const []),
         gitaConnection: j['gitaConnection'],
+        reflectionQuestion: j['reflectionQuestion'],
         offer: j['offer'] == null ? null : PracticeOffer.fromJson(j['offer']),
         offerState: OfferState.values.byName(j['offerState'] ?? 'pending'),
         safety: j['safety'] ?? false,
@@ -141,9 +165,12 @@ class Practice {
   final String trigger;
   final String action;
   final String quality;
+  final String frequency;
+  final String type;
   final String? reminder; // "HH:mm"
   final DateTime createdAt;
   final List<DateTime> completions;
+  static const targetDays = 7;
   const Practice({
     required this.id,
     required this.title,
@@ -151,9 +178,15 @@ class Practice {
     required this.action,
     required this.quality,
     required this.createdAt,
+    this.frequency = 'Every time',
+    this.type = 'Practice',
     this.reminder,
     this.completions = const [],
   });
+
+  /// Days practised so far toward the 7-day target.
+  int get daysDone => completions.length.clamp(0, targetDays);
+  bool get completed => completions.length >= targetDays;
 
   bool doneOn(DateTime d) => completions
       .any((c) => c.year == d.year && c.month == d.month && c.day == d.day);
@@ -170,6 +203,8 @@ class Practice {
         trigger: trigger,
         action: action,
         quality: quality,
+        frequency: frequency,
+        type: type,
         createdAt: createdAt,
         reminder: reminder ?? this.reminder,
         completions: completions ?? this.completions,
@@ -181,6 +216,8 @@ class Practice {
         'trigger': trigger,
         'action': action,
         'quality': quality,
+        'frequency': frequency,
+        'type': type,
         'reminder': reminder,
         'createdAt': createdAt.toIso8601String(),
         'completions': completions.map((e) => e.toIso8601String()).toList(),
@@ -191,6 +228,8 @@ class Practice {
         trigger: j['trigger'],
         action: j['action'],
         quality: j['quality'] ?? '',
+        frequency: j['frequency'] ?? 'Every time',
+        type: j['type'] ?? 'Practice',
         reminder: j['reminder'],
         createdAt: DateTime.parse(j['createdAt']),
         completions: [
@@ -229,3 +268,13 @@ String encodeList(List<Map<String, dynamic>> l) => jsonEncode(l);
 List<Map<String, dynamic>> decodeList(String? s) => s == null
     ? []
     : (jsonDecode(s) as List).cast<Map<String, dynamic>>();
+
+/// One recurrence of a pattern the user has noticed (PRD §35).
+class PatternHit {
+  final String label;
+  final DateTime at;
+  const PatternHit(this.label, this.at);
+  Map<String, dynamic> toJson() => {'label': label, 'at': at.toIso8601String()};
+  factory PatternHit.fromJson(Map<String, dynamic> j) =>
+      PatternHit(j['label'], DateTime.parse(j['at']));
+}

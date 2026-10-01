@@ -30,7 +30,7 @@ void main() {
     await s.send('x');
     await s.send('y');
     final m = s.messages.last;
-    s.createPractice(m.id, m.offer!, reminder: '08:00');
+    s.createPractice(m.offer!, msgId: m.id, reminder: '08:00');
     expect(s.practices.length, 1);
     expect(s.messages.last.offerState, OfferState.created);
     s.markDone(s.practices.first.id);
@@ -56,9 +56,13 @@ void main() {
   testWidgets('onboarding then shell', (tester) async {
     final s = await makeState();
     await tester.pumpWidget(GitaSetuApp(state: s));
-    expect(find.text('Begin'), findsOneWidget);
+    expect(find.text('Get Started'), findsOneWidget);
+    await tester.tap(find.text('Get Started'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Begin'));
     await tester.pumpAndSettle();
-    expect(find.text('Take a moment before you begin.'), findsOneWidget);
+    expect(find.text('May your day be calm and clear.'), findsOneWidget);
   });
 }

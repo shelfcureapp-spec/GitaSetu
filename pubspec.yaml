@@ -60,6 +60,27 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora-400.ttf
+        - asset: assets/fonts/Lora-600.ttf
+          weight: 600
+        - asset: assets/fonts/Lora-700.ttf
+          weight: 700
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-400.ttf
+        - asset: assets/fonts/Nunito-600.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-700.ttf
+          weight: 700
+    - family: NotoSerifDevanagari
+      fonts:
+        - asset: assets/fonts/NotoSerifDevanagari-400.ttf
+        - asset: assets/fonts/NotoSerifDevanagari-600.ttf
+          weight: 600
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

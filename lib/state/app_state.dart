@@ -11,6 +11,8 @@ class AppState extends ChangeNotifier {
     practices = decodeList(_prefs.getString('practices')).map(Practice.fromJson).toList();
     reflections = decodeList(_prefs.getString('reflections')).map(Reflection.fromJson).toList();
     messages = decodeList(_prefs.getString('messages')).map(ChatMessage.fromJson).toList();
+    patterns = decodeList(_prefs.getString('patterns')).map(PatternHit.fromJson).toList();
+    bookmarks = (_prefs.getStringList('bookmarks') ?? const []).toSet();
   }
 
   final SharedPreferences _prefs;
@@ -21,7 +23,16 @@ class AppState extends ChangeNotifier {
   late List<Practice> practices;
   late List<Reflection> reflections;
   late List<ChatMessage> messages;
+  late List<PatternHit> patterns;
+  late Set<String> bookmarks;
   bool thinking = false;
+
+  /// Selected bottom-nav tab: 0 Home, 1 Explore, 2 Talk, 3 Practice, 4 Profile.
+  int tab = 0;
+  void go(int i) {
+    tab = i;
+    notifyListeners();
+  }
   int _seq = 0;
 
   String _id() => '${DateTime.now().microsecondsSinceEpoch}_${_seq++}';
@@ -32,6 +43,8 @@ class AppState extends ChangeNotifier {
     await _prefs.setString('practices', encodeList(practices.map((e) => e.toJson()).toList()));
     await _prefs.setString('reflections', encodeList(reflections.map((e) => e.toJson()).toList()));
     await _prefs.setString('messages', encodeList(messages.map((e) => e.toJson()).toList()));
+    await _prefs.setString('patterns', encodeList(patterns.map((e) => e.toJson()).toList()));
+    await _prefs.setStringList('bookmarks', bookmarks.toList());
   }
 
   void _commit() {
@@ -67,10 +80,14 @@ class AppState extends ChangeNotifier {
           text: turn.text,
           verseRefs: turn.verseRefs,
           gitaConnection: turn.gitaConnection,
+          reflectionQuestion: turn.reflectionQuestion,
           offer: turn.offer,
           safety: turn.safety,
         )
       ];
+      if (turn.patternLabel != null) {
+        patterns = [...patterns, PatternHit(turn.patternLabel!, DateTime.now())];
+      }
     } catch (_) {
       messages = [
         ...messages,
@@ -100,18 +117,20 @@ class AppState extends ChangeNotifier {
 
   /// The ONLY path that creates a practice, called from an explicit user tap
   /// on "Create Practice" (PRD §24).
-  Practice createPractice(String msgId, PracticeOffer offer, {String? reminder}) {
+  Practice createPractice(PracticeOffer offer, {String? msgId, String? reminder}) {
     final p = Practice(
       id: _id(),
       title: offer.title,
       trigger: offer.trigger,
       action: offer.action,
       quality: offer.quality,
+      frequency: offer.frequency,
+      type: offer.type,
       reminder: reminder,
       createdAt: DateTime.now(),
     );
     practices = [...practices, p];
-    _setOffer(msgId, OfferState.created);
+    if (msgId != null) _setOffer(msgId, OfferState.created);
     _commit();
     return p;
   }
@@ -127,6 +146,30 @@ class AppState extends ChangeNotifier {
     ];
     _commit();
   }
+
+  void restartPractice(String id) {
+    practices = [
+      for (final p in practices) p.id == id ? p.copyWith(completions: const []) : p
+    ];
+    _commit();
+  }
+
+  void toggleBookmark(String ref) {
+    bookmarks.contains(ref) ? bookmarks.remove(ref) : bookmarks.add(ref);
+    _commit();
+  }
+
+  /// Pattern label -> number of times noticed (most frequent first).
+  List<MapEntry<String, int>> get patternCounts {
+    final m = <String, int>{};
+    for (final p in patterns) {
+      m[p.label] = (m[p.label] ?? 0) + 1;
+    }
+    return m.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  }
+
+  List<Practice> get activePractices => practices.where((p) => !p.completed).toList();
+  List<Practice> get completedPractices => practices.where((p) => p.completed).toList();
 
   void setReminder(String practiceId, String? hhmm) {
     practices = [
@@ -174,6 +217,9 @@ class AppState extends ChangeNotifier {
     practices = [];
     reflections = [];
     messages = [];
+    patterns = [];
+    bookmarks = {};
+    tab = 0;
     notifyListeners();
   }
 }

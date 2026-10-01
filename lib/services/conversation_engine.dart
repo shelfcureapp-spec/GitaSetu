@@ -16,6 +16,8 @@ class AssistantTurn {
   final String text;
   final List<String> verseRefs;
   final String? gitaConnection;
+  final String? reflectionQuestion;
+  final String? patternLabel;
   final PracticeOffer? offer;
   final Confidence confidence;
   final bool safety;
@@ -23,6 +25,8 @@ class AssistantTurn {
     required this.text,
     this.verseRefs = const [],
     this.gitaConnection,
+    this.reflectionQuestion,
+    this.patternLabel,
     this.offer,
     this.confidence = Confidence.low,
     this.safety = false,
@@ -95,12 +99,15 @@ class LocalGuidedEngine implements ConversationEngine {
           '— I may be wrong, so tell me if it does not fit.\n\n${concept.interpretation}',
       verseRefs: [ref],
       gitaConnection: GitaKnowledge.verses[ref]!.summary,
+      reflectionQuestion: concept.reflectionQuestion,
+      patternLabel: concept.primaryEnglish,
       confidence: Confidence.medium,
       offer: PracticeOffer(
         title: concept.practiceTitle,
         trigger: concept.practiceTrigger,
         action: concept.practiceAction,
         quality: concept.quality,
+        type: concept.practiceType,
       ),
     );
   }
@@ -116,10 +123,10 @@ RULES:
 - Investigate first: ask ONE short question at a time (what happened before, what they wanted, what they feared losing). Do not give a teaching until you have asked at least two questions, unless the user clearly asks for one.
 - You may cite ONLY verses listed in CONTEXT_VERSES, by their ref. Never invent verses, Sanskrit, or meanings.
 - Keep replies under 90 words. One teaching, one tiny practice, one question at most.
-- Only when you have given a teaching, include one tiny practice in "practice". Never say a practice has been created; the user confirms in the app.
+- Only when you have given a teaching, include one reflection_question and one tiny practice in "practice". Never say a practice has been created; the user confirms in the app.
 - Do not offer a practice for serious distress; gently note GitaSetu is not a substitute for professional support.
 Respond as JSON: {"text": string, "verse_refs": string[], "gita_connection": string|null,
-"confidence": "high"|"medium"|"low", "practice": {"title","trigger","action","quality"}|null}
+"confidence": "high"|"medium"|"low", "reflection_question": string|null, "practice": {"title","trigger","action","quality"}|null}
 ''';
 
   @override
@@ -167,11 +174,13 @@ Respond as JSON: {"text": string, "verse_refs": string[], "gita_connection": str
         .timeout(const Duration(seconds: 30));
     if (res.statusCode != 200) throw Exception('Gemini ${res.statusCode}');
     final raw = jsonDecode(res.body)['candidates'][0]['content']['parts'][0]['text'] as String;
-    return parse(raw, allowedRefs: GitaKnowledge.verses.keys.toSet());
+    return parse(raw,
+        allowedRefs: GitaKnowledge.verses.keys.toSet(), patternLabel: concept?.primaryEnglish);
   }
 
   /// Parses model JSON and drops any verse ref not in the curated store.
-  static AssistantTurn parse(String raw, {required Set<String> allowedRefs}) {
+  static AssistantTurn parse(String raw,
+      {required Set<String> allowedRefs, String? patternLabel}) {
     final j = jsonDecode(raw) as Map<String, dynamic>;
     final verseRefs = [
       for (final r in (j['verse_refs'] as List? ?? const []))
@@ -189,6 +198,8 @@ Respond as JSON: {"text": string, "verse_refs": string[], "gita_connection": str
       text: (j['text'] as String).trim(),
       verseRefs: verseRefs,
       gitaConnection: connection,
+      reflectionQuestion: j['reflection_question'] as String?,
+      patternLabel: verseRefs.isEmpty ? null : patternLabel,
       confidence: conf,
       offer: p is Map<String, dynamic> ? PracticeOffer.fromJson(p) : null,
     );
