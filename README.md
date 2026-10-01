@@ -17,9 +17,12 @@ flutter test
 
 ## Status (V1 in progress)
 
-Built: onboarding, Home, Explore + topic study, "Talk to GitaSetu" (question-first investigation,
-Gemini or offline fallback, verse citations limited to the curated store), confirm-before-create
-practices, practice tracking, reflections, safety screen, local persistence.
+Built (UI follows the design reference): splash and onboarding, Home, Explore (topics, chapters,
+audio list), topic pages with Gita / interpretation / application kept separate, Gita Study with
+Sanskrit where loaded, "Talk to GitaSetu" (question-first, Gemini or offline fallback, verse
+citations limited to the curated store), review-and-confirm practice creation, My Practice,
+Evening Reflection, Your Journey (patterns, insights, growth), settings, safety screen, local storage.
 
-Not yet: Gemini TTS audio, real push reminders (reminder time is stored only), Supabase auth/sync,
-pgvector retrieval, full verse text (Sanskrit/translations) ingested from the curated source.
+Not yet: Gemini TTS audio (Listen buttons are placeholders), real push reminders (time is stored
+only), Supabase auth/sync, pgvector retrieval, verified Sanskrit/translations for all verses,
+photographic imagery (illustrations are drawn in code).
