@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<AppState> makeState() async {
   SharedPreferences.setMockInitialValues({});
-  return AppState(await SharedPreferences.getInstance(), engine: LocalGuidedEngine());
+  return AppState(await SharedPreferences.getInstance(), engine: LocalGuidedEngine(), minReplyDelay: Duration.zero);
 }
 
 void main() {
@@ -53,7 +53,10 @@ void main() {
     expect(t.verseRefs, ['2.62']);
   });
 
-  testWidgets('onboarding then shell', (tester) async {
+  testWidgets('onboarding then shell (reduced motion)', (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     final s = await makeState();
     await tester.pumpWidget(GitaSetuApp(state: s));
     expect(find.text('Get Started'), findsOneWidget);
@@ -64,5 +67,25 @@ void main() {
     await tester.tap(find.text('Begin'));
     await tester.pumpAndSettle();
     expect(find.text('May your day be calm and clear.'), findsOneWidget);
+  });
+
+  testWidgets('animated flow runs without errors', (tester) async {
+    final s = await makeState();
+    await tester.pumpWidget(GitaSetuApp(state: s));
+    await tester.pump(const Duration(seconds: 3));
+    await tester.tap(find.text('Get Started'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Skip'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Begin'));
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('May your day be calm and clear.'), findsOneWidget);
+    s.go(2);
+    await tester.pump(const Duration(seconds: 1));
+    await s.send('I keep getting angry');
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.textContaining('just before the anger'), findsOneWidget);
+    // Let staggered entrances and timers finish before the test ends.
+    await tester.pump(const Duration(seconds: 2));
   });
 }

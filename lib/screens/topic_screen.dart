@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/art.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../data/gita_knowledge.dart';
 import '../models/models.dart';
@@ -30,7 +31,7 @@ class TopicScreen extends StatelessWidget {
         SizedBox(
           height: 270,
           child: Stack(fit: StackFit.expand, children: [
-            SceneArt(sceneFor(topic.scene), sunAt: const Offset(0.75, 0.3)),
+            Hero(tag: 'topic-${topic.name}', child: SceneArt(sceneFor(topic.scene), sunAt: const Offset(0.75, 0.3))),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, GS.cream.withValues(alpha: 0.0), GS.cream], stops: const [0, 0.55, 1]),
@@ -55,7 +56,7 @@ class TopicScreen extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Column(children: [
+          child: Column(children: staggered(start: 1, [
             for (final r in rows) ...[
               GsCard(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -77,7 +78,7 @@ class TopicScreen extends StatelessWidget {
             const SizedBox(height: 10),
             SoftButton('Talk about ${topic.name.toLowerCase()}', icon: Icons.chat_bubble_outline, onPressed: () => openTalk(context)),
             const SizedBox(height: 28),
-          ]),
+          ])),
         ),
       ]),
     );
@@ -179,7 +180,7 @@ class TopicSectionScreen extends StatelessWidget {
     }
     return Scaffold(
       appBar: AppBar(title: Text(title, style: GS.h(20))),
-      body: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: children),
+      body: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: staggered(children)),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/art.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
@@ -17,6 +18,7 @@ class PracticeCreationScreen extends StatefulWidget {
 
 class _PracticeCreationScreenState extends State<PracticeCreationScreen> {
   TimeOfDay? _time;
+  bool _saving = false;
 
   String? get _hhmm => _time == null ? null : '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}';
 
@@ -53,14 +55,14 @@ class _PracticeCreationScreenState extends State<PracticeCreationScreen> {
 
     return Scaffold(
       appBar: AppBar(),
-      body: ListView(padding: const EdgeInsets.fromLTRB(22, 0, 22, 28), children: [
+      body: ListView(padding: const EdgeInsets.fromLTRB(22, 0, 22, 28), children: staggered([
         Text('A small practice\nfor you', style: GS.h(28, height: 1.2)),
         const SizedBox(height: 18),
         Container(
           decoration: BoxDecoration(color: const Color(0xFFEEF3EA), borderRadius: BorderRadius.circular(24)),
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
           child: Column(children: [
-            const Sprout(size: 84),
+            const Breathing(child: Sprout(size: 84)),
             const SizedBox(height: 12),
             Text(o.title, textAlign: TextAlign.center, style: GS.h(21)),
             const SizedBox(height: 10),
@@ -78,17 +80,18 @@ class _PracticeCreationScreenState extends State<PracticeCreationScreen> {
         const Divider(height: 1),
         row(Icons.notifications_none, 'Reminder', _time == null ? 'None — tap to choose a time' : _time!.format(context), onTap: _pick, chevron: true),
         const SizedBox(height: 22),
-        PrimaryButton('Create Practice', onPressed: () {
+        PrimaryButton('Create Practice', onPressed: _saving ? null : () async {
+          setState(() => _saving = true);
           context.read<AppState>().createPractice(o, msgId: widget.msgId, reminder: _hhmm);
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to My Practice.')));
+          await showCalmSuccess(context, 'Added to My Practice');
+          if (context.mounted) Navigator.of(context).pop();
         }),
         const SizedBox(height: 10),
         SoftButton('Not Now', onPressed: () {
           if (widget.msgId != null) context.read<AppState>().declineOffer(widget.msgId!);
           Navigator.of(context).pop();
         }),
-      ]),
+      ])),
     );
   }
 }

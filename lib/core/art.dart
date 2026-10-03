@@ -114,17 +114,56 @@ class _ScenePainter extends CustomPainter {
 
 /// A stylised lotus.
 class Lotus extends StatelessWidget {
-  const Lotus({super.key, this.size = 80, this.color = const Color(0xFFE9A46B), this.light = const Color(0xFFF9DDB8)});
+  const Lotus({super.key, this.size = 80, this.bloom = 1, this.color = const Color(0xFFE9A46B), this.light = const Color(0xFFF9DDB8)});
   final double size;
+
+  /// 0 = closed bud, 1 = fully open.
+  final double bloom;
   final Color color, light;
   @override
   Widget build(BuildContext context) =>
-      SizedBox(width: size, height: size * 0.8, child: CustomPaint(painter: _LotusPainter(color, light)));
+      SizedBox(width: size, height: size * 0.8, child: CustomPaint(painter: _LotusPainter(color, light, bloom)));
+}
+
+/// A lotus that opens once when it first appears.
+class BloomingLotus extends StatelessWidget {
+  const BloomingLotus({super.key, this.size = 80, this.duration = const Duration(milliseconds: 1600), this.delay = Duration.zero});
+  final double size;
+  final Duration duration, delay;
+  @override
+  Widget build(BuildContext context) {
+    final reduced = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: reduced ? 1 : -delay.inMilliseconds / duration.inMilliseconds, end: 1),
+      duration: reduced ? Duration.zero : duration + delay,
+      curve: Curves.linear,
+      builder: (_, t, _) => Lotus(size: size, bloom: Curves.easeOutCubic.transform(t.clamp(0.0, 1.0))),
+    );
+  }
+}
+
+/// A scene whose sun slowly rises into place.
+class RisingScene extends StatelessWidget {
+  const RisingScene(this.kind, {super.key, this.from = const Offset(0.5, 0.62), this.to = const Offset(0.5, 0.42), this.duration = const Duration(milliseconds: 2400)});
+  final SceneKind kind;
+  final Offset from, to;
+  final Duration duration;
+  @override
+  Widget build(BuildContext context) {
+    final reduced = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return TweenAnimationBuilder<Offset>(
+      tween: Tween(begin: reduced ? to : from, end: to),
+      duration: reduced ? Duration.zero : duration,
+      curve: Curves.easeOutCubic,
+      builder: (_, o, _) => SceneArt(kind, sunAt: o),
+    );
+  }
 }
 
 class _LotusPainter extends CustomPainter {
-  _LotusPainter(this.c, this.l);
+  _LotusPainter(this.c, this.l, this.bloom);
   final Color c, l;
+  final double bloom;
   @override
   void paint(Canvas canvas, Size s) {
     final cx = s.width / 2, base = s.height * 0.92;
@@ -144,18 +183,22 @@ class _LotusPainter extends CustomPainter {
       canvas.restore();
     }
 
-    final len = s.height * 0.85;
-    petal(-1.15, len * 0.8, s.width * 0.16, 0.85);
-    petal(1.15, len * 0.8, s.width * 0.16, 0.85);
-    petal(-0.62, len * 0.92, s.width * 0.17, 0.95);
-    petal(0.62, len * 0.92, s.width * 0.17, 0.95);
+    final len = s.height * 0.85 * (0.62 + 0.38 * bloom);
+    final open = 0.12 + 0.88 * bloom;
+    final outer = (bloom * 1.4 - 0.4).clamp(0.0, 1.0);
+    if (outer > 0) {
+      petal(-1.15 * open, len * 0.8, s.width * 0.16, 0.85 * outer);
+      petal(1.15 * open, len * 0.8, s.width * 0.16, 0.85 * outer);
+    }
+    petal(-0.62 * open, len * 0.92, s.width * 0.17, 0.95);
+    petal(0.62 * open, len * 0.92, s.width * 0.17, 0.95);
     petal(0, len, s.width * 0.18, 1);
     canvas.drawOval(Rect.fromCenter(center: Offset(cx, base + 1), width: s.width * 0.7, height: s.height * 0.06),
         Paint()..color = const Color(0xFF2E7D6B).withValues(alpha: 0.45));
   }
 
   @override
-  bool shouldRepaint(_LotusPainter old) => false;
+  bool shouldRepaint(_LotusPainter old) => old.bloom != bloom;
 }
 
 /// A small sprouting seedling.

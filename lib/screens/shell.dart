@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/motion.dart';
 import '../state/app_state.dart';
 import 'explore_screen.dart';
 import 'home_screen.dart';
@@ -17,7 +18,7 @@ class Shell extends StatelessWidget {
     final dark = s.tab == 4;
     return Scaffold(
       backgroundColor: dark ? const Color(0xFF0C2229) : null,
-      body: IndexedStack(
+      body: FadeIndexedStack(
         index: s.tab,
         children: const [
           HomeScreen(),

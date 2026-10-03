@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../core/art.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
@@ -135,8 +136,8 @@ class _Start extends StatelessWidget {
       (Icons.schedule, 'I procrastinate important work.'),
       (Icons.track_changes, 'I want to be more disciplined.'),
     ];
-    return ListView(padding: const EdgeInsets.fromLTRB(22, 26, 22, 12), children: [
-      const Center(child: Lotus(size: 84)),
+    return ListView(padding: const EdgeInsets.fromLTRB(22, 26, 22, 12), children: staggered([
+      const Center(child: Breathing(amount: 0.04, child: BloomingLotus(size: 84))),
       const SizedBox(height: 14),
       Center(child: Text('Talk to GitaSetu', style: GS.h(28))),
       const SizedBox(height: 8),
@@ -155,12 +156,15 @@ class _Start extends StatelessWidget {
         ),
         const SizedBox(height: 10),
       ],
-    ]);
+    ]));
   }
 }
 
 class _Conversation extends StatelessWidget {
   const _Conversation({required this.controller});
+
+  /// Messages already shown once; only new ones animate in.
+  static final _seen = <String>{};
   final ScrollController controller;
   @override
   Widget build(BuildContext context) {
@@ -170,7 +174,11 @@ class _Conversation extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       itemCount: s.messages.length + (s.thinking ? 1 : 0),
       separatorBuilder: (_, _) => const SizedBox(height: 14),
-      itemBuilder: (_, i) => i == s.messages.length ? const _Typing() : _Bubble(msg: s.messages[i]),
+      itemBuilder: (_, i) {
+        if (i == s.messages.length) return const FadeSlideIn(child: _Typing());
+        final m = s.messages[i];
+        return FadeSlideIn(key: ValueKey(m.id), animate: _seen.add(m.id), offset: 14, child: _Bubble(msg: m));
+      },
     );
   }
 }
@@ -181,7 +189,7 @@ class _Typing extends StatelessWidget {
   Widget build(BuildContext context) => const Row(children: [
         GsAvatar(size: 32),
         SizedBox(width: 10),
-        Icon(Icons.more_horiz, color: GS.muted, size: 30),
+        TypingDots(),
       ]);
 }
 
@@ -261,7 +269,7 @@ class _OfferCard extends StatelessWidget {
         const SizedBox(height: 4),
         Text('${o.trigger}, ${o.action[0].toLowerCase()}${o.action.substring(1)}', style: GS.b(14.5, height: 1.45)),
         const SizedBox(height: 14),
-        switch (msg.offerState) {
+        CalmSwitcher(id: msg.offerState, child: switch (msg.offerState) {
           OfferState.pending => Column(children: [
               PrimaryButton('Create Practice', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PracticeCreationScreen(offer: o, msgId: msg.id)))),
               const SizedBox(height: 8),
@@ -273,7 +281,7 @@ class _OfferCard extends StatelessWidget {
               Text('Added to My Practice', style: GS.b(14, w: FontWeight.w700, color: GS.teal)),
             ]),
           OfferState.declined => Text('Not now — that is fine.', style: GS.b(14, color: GS.muted)),
-        },
+        }),
       ]),
     );
   }

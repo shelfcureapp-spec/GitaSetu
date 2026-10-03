@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/gs_widgets.dart';
@@ -43,7 +44,10 @@ class _JourneyScreenState extends State<JourneyScreen> {
           const SizedBox(height: 16),
           PillTabs(labels: const ['Patterns', 'Insights', 'Growth'], index: _tab, onChanged: (i) => setState(() => _tab = i), dark: true),
           const SizedBox(height: 22),
-          ...switch (_tab) { 0 => _patterns(s), 1 => _insights(s), _ => _growth(s) },
+          CalmSwitcher(
+            id: _tab,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: staggered(switch (_tab) { 0 => _patterns(s), 1 => _insights(s), _ => _growth(s) })),
+          ),
         ]),
       ),
     );

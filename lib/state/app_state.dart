@@ -4,7 +4,7 @@ import '../models/models.dart';
 import '../services/conversation_engine.dart';
 
 class AppState extends ChangeNotifier {
-  AppState(this._prefs, {ConversationEngine? engine})
+  AppState(this._prefs, {ConversationEngine? engine, this.minReplyDelay = const Duration(milliseconds: 900)})
       : _engine = engine ?? RoutingEngine() {
     name = _prefs.getString('name') ?? '';
     onboarded = _prefs.getBool('onboarded') ?? false;
@@ -17,6 +17,10 @@ class AppState extends ChangeNotifier {
 
   final SharedPreferences _prefs;
   final ConversationEngine _engine;
+
+  /// Replies never land instantly; a short pause reads as calmer and lets
+  /// the typing indicator show. Tests pass Duration.zero.
+  final Duration minReplyDelay;
 
   late String name;
   late bool onboarded;
@@ -71,7 +75,11 @@ class AppState extends ChangeNotifier {
     thinking = true;
     _commit();
     try {
-      final turn = await _engine.respond(messages);
+      final results = await Future.wait([
+        _engine.respond(messages),
+        if (minReplyDelay > Duration.zero) Future<void>.delayed(minReplyDelay),
+      ]);
+      final turn = results.first as AssistantTurn;
       messages = [
         ...messages,
         ChatMessage(

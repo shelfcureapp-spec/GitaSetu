@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/art.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../data/gita_knowledge.dart';
 import '../state/app_state.dart';
@@ -74,14 +75,14 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ]),
                 const SizedBox(height: 22),
-                _ReflectionCard(text: reflection),
+                FadeSlideIn(order: 1, offset: 26, child: _ReflectionCard(text: reflection)),
               ]),
             ),
           ),
         ]),
         Padding(
           padding: const EdgeInsets.fromLTRB(18, 24, 18, 24),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: staggered(start: 2, [
             const SectionTitle("Today's Gita insight"),
             GsCard(
               onTap: () => openVerse(context, verse.ref),
@@ -106,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                   ]),
                 ),
                 const SizedBox(width: 8),
-                const Lotus(size: 76),
+                const BloomingLotus(size: 76, delay: Duration(milliseconds: 400)),
               ]),
             ),
             const SizedBox(height: 22),
@@ -156,7 +157,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             PrimaryButton('Pause & Reflect', icon: Icons.chat_bubble_outline, onPressed: () => s.go(2)),
-          ]),
+          ])),
         ),
       ],
     );
@@ -185,7 +186,7 @@ class _ReflectionCard extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: 6),
-          const Sprout(size: 84),
+          const Breathing(child: Sprout(size: 84)),
         ]),
       );
 }

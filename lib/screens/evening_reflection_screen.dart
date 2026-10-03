@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/gs_widgets.dart';
@@ -74,8 +75,11 @@ class _EveningReflectionScreenState extends State<EveningReflectionScreen> {
                   ]),
                 ),
               ),
-              if (_open == p)
-                Padding(
+              AnimatedSize(
+                duration: Motion.reduced(context) ? Duration.zero : const Duration(milliseconds: 260),
+                curve: Motion.ease,
+                alignment: Alignment.topCenter,
+                child: _open != p ? const SizedBox(width: double.infinity) : Padding(
                   padding: const EdgeInsets.only(bottom: 14),
                   child: TextField(
                     controller: _c[p],
@@ -91,15 +95,21 @@ class _EveningReflectionScreenState extends State<EveningReflectionScreen> {
                     ),
                   ),
                 ),
+              ),
             ]),
           ),
           const SizedBox(height: 10),
         ],
         const SizedBox(height: 10),
-        PrimaryButton('Save Reflection', onPressed: () {
-          context.read<AppState>().addReflection({for (final e in _c.entries) e.key: e.value.text}, practiceId: widget.practiceId);
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reflection saved.')));
+        PrimaryButton('Save Reflection', onPressed: () async {
+          final answers = {for (final e in _c.entries) e.key: e.value.text};
+          if (answers.values.every((v) => v.trim().isEmpty)) {
+            Navigator.of(context).pop();
+            return;
+          }
+          context.read<AppState>().addReflection(answers, practiceId: widget.practiceId);
+          await showCalmSuccess(context, 'Reflection saved');
+          if (context.mounted) Navigator.of(context).pop();
         }),
       ]),
     );

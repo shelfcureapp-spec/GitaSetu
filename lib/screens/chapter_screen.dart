@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../data/gita_knowledge.dart';
 import '../widgets/gs_widgets.dart';
@@ -13,7 +14,7 @@ class ChapterScreen extends StatelessWidget {
       ..sort((a, b) => a.ref.compareTo(b.ref));
     return Scaffold(
       appBar: AppBar(title: Text('Chapter ${chapter.number}', style: GS.h(20))),
-      body: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
+      body: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: staggered([
         Text(chapter.focus, style: GS.b(15, color: GS.muted)),
         const SizedBox(height: 18),
         if (verses.isEmpty)
@@ -38,7 +39,7 @@ class ChapterScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
-      ]),
+      ])),
     );
   }
 }

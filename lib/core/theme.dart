@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'motion.dart';
 
 /// Design tokens, taken from the GitaSetu UI reference.
 class GS {
@@ -49,6 +50,9 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: GS.cream,
       fontFamily: GS.sans,
+      pageTransitionsTheme: PageTransitionsTheme(builders: {
+        for (final p in TargetPlatform.values) p: const CalmPageTransitionsBuilder(),
+      }),
       textTheme: ThemeData.light().textTheme.apply(fontFamily: GS.sans, bodyColor: GS.ink, displayColor: GS.ink),
       appBarTheme: const AppBarTheme(
         backgroundColor: GS.cream,

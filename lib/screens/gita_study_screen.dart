@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../data/gita_knowledge.dart';
 import '../models/models.dart';
@@ -27,7 +28,7 @@ class GitaStudyScreen extends StatelessWidget {
         title: Text(v.title, style: GS.h(18)),
         actions: [BookmarkButton(ref)],
       ),
-      body: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 32), children: [
+      body: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 32), children: staggered([
         if (v.sanskrit != null)
           GsCard(
             padding: const EdgeInsets.all(20),
@@ -82,7 +83,7 @@ class GitaStudyScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(child: SoftButton('Next', onPressed: i < keys.length - 1 ? () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => GitaStudyScreen(ref: keys[i + 1]))) : null)),
         ]),
-      ]),
+      ])),
     );
   }
 }

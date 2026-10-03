@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../core/motion.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
@@ -47,8 +48,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
               ),
             ]),
           ),
-        for (final p in list) ...[
-          _PracticeTile(p: p),
+        for (final (i, p) in list.indexed) ...[
+          FadeSlideIn(key: ValueKey('${_tab}_${p.id}'), order: i + 1, child: _PracticeTile(p: p)),
           const SizedBox(height: 12),
         ],
         const SizedBox(height: 8),
@@ -134,7 +135,7 @@ class PracticeDetailScreen extends StatelessWidget {
           ],
         ),
       ]),
-      body: ListView(padding: const EdgeInsets.fromLTRB(22, 0, 22, 28), children: [
+      body: ListView(padding: const EdgeInsets.fromLTRB(22, 0, 22, 28), children: staggered([
         Text(p.title, style: GS.h(26)),
         const SizedBox(height: 6),
         Text('${p.daysDone} / ${Practice.targetDays} days', style: GS.b(14, w: FontWeight.w700, color: GS.gold)),
@@ -157,7 +158,7 @@ class PracticeDetailScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(child: SoftButton('Reflect', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => EveningReflectionScreen(practiceId: p.id))))),
         ]),
-      ]),
+      ])),
     );
   }
 }

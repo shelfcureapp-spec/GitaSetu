@@ -22,6 +22,7 @@ audio list), topic pages with Gita / interpretation / application kept separate,
 Sanskrit where loaded, "Talk to GitaSetu" (question-first, Gemini or offline fallback, verse
 citations limited to the curated store), review-and-confirm practice creation, My Practice,
 Evening Reflection, Your Journey (patterns, insights, growth), settings, safety screen, local storage.
+Calm motion throughout (lib/core/motion.dart), switched off when the OS "reduce motion" setting is on.
 
 Not yet: Gemini TTS audio (Listen buttons are placeholders), real push reminders (time is stored
 only), Supabase auth/sync, pgvector retrieval, verified Sanskrit/translations for all verses,
