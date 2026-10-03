@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../core/art.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/gs_widgets.dart';
@@ -42,7 +43,7 @@ class _IntroFlowState extends State<IntroFlow> {
             page: _page,
             onNext: _next,
             onSkip: () => _pc.jumpToPage(2),
-            top: const SceneArt(SceneKind.bridge, sunAt: Offset(0.7, 0.28)),
+            top: const LivingScene(SceneKind.bridge, sunAt: Offset(0.7, 0.28)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -136,7 +137,7 @@ class _Splash extends StatelessWidget {
     body: Stack(
       fit: StackFit.expand,
       children: [
-        const RisingScene(SceneKind.dawn),
+        const LivingScene(SceneKind.dawn, sunAt: Offset(0.5, 0.42), rising: true),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(28, 56, 28, 24),
@@ -157,13 +158,10 @@ class _Splash extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                const Breathing(
-                  amount: 0.03,
-                  child: BloomingLotus(
-                    size: 120,
-                    delay: Duration(milliseconds: 500),
-                    duration: Duration(milliseconds: 2000),
-                  ),
+                const LotusPond(
+                  size: 110,
+                  delay: Duration(milliseconds: 500),
+                  rippleColor: Colors.white,
                 ),
                 const Spacer(),
                 FadeSlideIn(
@@ -319,7 +317,7 @@ class _NamePageState extends State<_NamePage> {
         children: [
           const Spacer(),
           const Center(
-            child: Breathing(amount: 0.03, child: BloomingLotus(size: 96)),
+            child: LotusPond(size: 90),
           ),
           const SizedBox(height: 28),
           Text('What should we\ncall you?', style: GS.h(30, height: 1.15)),

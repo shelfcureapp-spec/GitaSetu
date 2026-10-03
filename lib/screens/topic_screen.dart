@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/art.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../data/gita_knowledge.dart';
 import '../models/models.dart';
@@ -31,7 +31,7 @@ class TopicScreen extends StatelessWidget {
         SizedBox(
           height: 270,
           child: Stack(fit: StackFit.expand, children: [
-            Hero(tag: 'topic-${topic.name}', child: SceneArt(sceneFor(topic.scene), sunAt: const Offset(0.75, 0.3))),
+            Hero(tag: 'topic-${topic.name}', child: LivingScene(sceneFor(topic.scene), sunAt: const Offset(0.75, 0.3))),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, GS.cream.withValues(alpha: 0.0), GS.cream], stops: const [0, 0.55, 1]),

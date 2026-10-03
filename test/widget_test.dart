@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitasetu/core/motion_graphics.dart';
 import 'package:gitasetu/main.dart';
 import 'package:gitasetu/models/models.dart';
 import 'package:gitasetu/services/conversation_engine.dart';
@@ -87,5 +89,23 @@ void main() {
     expect(find.textContaining('just before the anger'), findsOneWidget);
     // Let staggered entrances and timers finish before the test ends.
     await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('breathing guide moves through its phases', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Center(child: BreathingGuide()))));
+    expect(find.text('Tap to begin'), findsOneWidget);
+    await tester.tap(find.byType(BreathingGuide));
+    await tester.pump(); // first frame starts the clock
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Breathe in'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 3500));
+    expect(find.text('Rest'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('Breathe out'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('1 breath'), findsOneWidget);
+    await tester.tap(find.byType(BreathingGuide));
+    await tester.pump();
+    expect(find.text('Tap to begin'), findsOneWidget);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
@@ -141,7 +142,18 @@ class PracticeDetailScreen extends StatelessWidget {
         Text('${p.daysDone} / ${Practice.targetDays} days', style: GS.b(14, w: FontWeight.w700, color: GS.gold)),
         const SizedBox(height: 8),
         ProgressBar(p.daysDone / Practice.targetDays, height: 7),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
+        GsCard(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+          child: Column(children: [
+            Text('Try it now', style: GS.b(12.5, w: FontWeight.w700, color: GS.terracotta)),
+            const SizedBox(height: 4),
+            Text('Take a mindful pause', style: GS.h(18)),
+            const SizedBox(height: 16),
+            const BreathingGuide(size: 170),
+          ]),
+        ),
+        const SizedBox(height: 8),
         row(Icons.bolt_outlined, 'Trigger', p.trigger),
         row(Icons.self_improvement, 'Action', p.action),
         row(Icons.repeat, 'Frequency', p.frequency),

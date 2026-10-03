@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/art.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../data/gita_knowledge.dart';
 import '../state/app_state.dart';
@@ -39,6 +40,7 @@ class HomeScreen extends StatelessWidget {
             height: 210,
             child: const DecoratedBox(
               decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [GS.navy, GS.navy2])),
+              child: FloatingMotes(count: 14),
             ),
           ),
           SafeArea(
@@ -186,7 +188,7 @@ class _ReflectionCard extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: 6),
-          const Breathing(child: Sprout(size: 84)),
+          const SwayingSprout(size: 84),
         ]),
       );
 }

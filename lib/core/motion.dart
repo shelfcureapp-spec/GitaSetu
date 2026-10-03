@@ -237,7 +237,10 @@ class _FadeIndexedStackState extends State<FadeIndexedStack> with SingleTickerPr
   @override
   Widget build(BuildContext context) => FadeTransition(
         opacity: CurvedAnimation(parent: _c, curve: Curves.easeOut),
-        child: IndexedStack(index: widget.index, children: widget.children),
+        child: IndexedStack(index: widget.index, children: [
+          // Hidden tabs pause their animations.
+          for (var i = 0; i < widget.children.length; i++) TickerMode(enabled: i == widget.index, child: widget.children[i]),
+        ]),
       );
 }
 

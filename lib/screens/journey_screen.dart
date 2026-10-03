@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/gs_widgets.dart';
@@ -26,7 +27,9 @@ class _JourneyScreenState extends State<JourneyScreen> {
     final s = context.watch<AppState>();
     return ColoredBox(
       color: _bg,
-      child: SafeArea(
+      child: Stack(children: [
+        const Positioned.fill(child: Starfield()),
+        SafeArea(
         bottom: false,
         child: ListView(padding: const EdgeInsets.fromLTRB(20, 16, 20, 28), children: [
           Row(children: [
@@ -50,6 +53,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
           ),
         ]),
       ),
+      ]),
     );
   }
 

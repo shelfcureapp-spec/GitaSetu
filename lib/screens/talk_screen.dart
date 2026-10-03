@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../core/art.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
@@ -137,7 +137,7 @@ class _Start extends StatelessWidget {
       (Icons.track_changes, 'I want to be more disciplined.'),
     ];
     return ListView(padding: const EdgeInsets.fromLTRB(22, 26, 22, 12), children: staggered([
-      const Center(child: Breathing(amount: 0.04, child: BloomingLotus(size: 84))),
+      const Center(child: LotusPond(size: 80)),
       const SizedBox(height: 14),
       Center(child: Text('Talk to GitaSetu', style: GS.h(28))),
       const SizedBox(height: 8),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../core/art.dart';
 import '../core/motion.dart';
+import '../core/motion_graphics.dart';
 import '../core/theme.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
@@ -62,7 +62,7 @@ class _PracticeCreationScreenState extends State<PracticeCreationScreen> {
           decoration: BoxDecoration(color: const Color(0xFFEEF3EA), borderRadius: BorderRadius.circular(24)),
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
           child: Column(children: [
-            const Breathing(child: Sprout(size: 84)),
+            const SwayingSprout(size: 84, motes: true),
             const SizedBox(height: 12),
             Text(o.title, textAlign: TextAlign.center, style: GS.h(21)),
             const SizedBox(height: 10),
